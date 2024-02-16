@@ -13,13 +13,13 @@ public class NBTFile {
     var byteBuffer: ByteBuffer
     let bufferAllocator: ByteBufferAllocator
     
-    init(io: NonBlockingFileIO, bufferAllocator: ByteBufferAllocator) throws {
+    public init(io: NonBlockingFileIO, bufferAllocator: ByteBufferAllocator) throws {
         self.io = io
         self.bufferAllocator = bufferAllocator
         self.byteBuffer = bufferAllocator.buffer(capacity: 0)
     }
     
-    func read(path: String, eventLoop: EventLoop, gzip: Bool = true) -> EventLoopFuture<NBT> {
+    public func read(path: String, eventLoop: EventLoop, gzip: Bool = true) -> EventLoopFuture<NBT> {
         self.byteBuffer = bufferAllocator.buffer(capacity: 0)
         return io.openFile(path: path, eventLoop: eventLoop).flatMap { fileHandle, fileRegion in
             return self.io.readChunked(fileRegion: fileRegion, allocator: self.bufferAllocator, eventLoop: eventLoop) { nextPart in
@@ -32,7 +32,7 @@ public class NBTFile {
         }
     }
     
-    func write(nbt: inout NBT, path: String, eventLoop: EventLoop, gzip: Bool = true) throws -> EventLoopFuture<Void> {
+    public func write(nbt: inout NBT, path: String, eventLoop: EventLoop, gzip: Bool = true) throws -> EventLoopFuture<Void> {
         self.byteBuffer = self.bufferAllocator.buffer(capacity: 0)
         try nbt.write(to: &self.byteBuffer)
         return io.openFile(path: path, eventLoop: eventLoop).flatMapThrowing { fileHandle, fileRegion in

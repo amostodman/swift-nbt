@@ -12,9 +12,9 @@ public struct NBT {
     public var rootTagName: String
     public var rootTag: NBTTag
     
-    init(readFrom buffer: inout ByteBuffer, gzip: Bool = true) throws {
+    public init(readFrom buffer: inout ByteBuffer, gzip: Bool = true) throws {
         if gzip {
-            var decompressed = try buffer.decompress(with: .gzip)
+            var decompressed = try buffer.decompress(with: .gzip())
             let rootTagID = decompressed.readInteger(endianness: .big, as: UInt8.self) ?? 0
             let rootTagNameLength = decompressed.readInteger(endianness: .big, as: UInt16.self) ?? 0
             rootTagName = decompressed.readString(length: Int(rootTagNameLength)) ?? ""
@@ -28,7 +28,7 @@ public struct NBT {
         }
     }
     
-    init(rootTagName: String, rootTag: NBTTag) {
+    public init(rootTagName: String, rootTag: NBTTag) {
         self.rootTagName = rootTagName
         self.rootTag = rootTag
     }
@@ -40,9 +40,10 @@ public struct NBT {
             tmpBuffer.writeInteger(UInt16(self.rootTagName.count), endianness: .big, as: UInt16.self)
             tmpBuffer.writeString(rootTagName)
             rootTag.write(to: &tmpBuffer)
-            let maxCompressedSize = CompressionAlgorithm.deflate.compressor.maxSize(from: tmpBuffer)
+            let compressionAlgorithm = CompressionAlgorithm.deflate()
+            let maxCompressedSize = compressionAlgorithm.compressor.maxSize(from: tmpBuffer)
             buffer.reserveCapacity(minimumWritableBytes: maxCompressedSize)
-            try tmpBuffer.compress(to: &buffer, with: .gzip)
+            try tmpBuffer.compress(to: &buffer, with: .gzip())
         }
         else {
             buffer.writeInteger(self.rootTag.tagID, endianness: .big)

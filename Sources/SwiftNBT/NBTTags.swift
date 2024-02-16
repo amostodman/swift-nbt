@@ -6,7 +6,7 @@
 //
 
 public struct NBTTags {
-    static let tags = [
+    public static let tags = [
         0x00: NBTEnd.self,
         0x01: NBTByte.self,
         0x02: NBTShort.self,
